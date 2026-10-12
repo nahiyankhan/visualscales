@@ -1,0 +1,588 @@
+* {
+  box-sizing: border-box;
+}
+:root {
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  color: #edeeef;
+  background: #111213;
+}
+body {
+  margin: 0;
+}
+.space-atlas {
+  --space-ease: cubic-bezier(0.23, 1, 0.32, 1);
+  position: relative;
+  height: 100svh;
+  min-height: 600px;
+  width: 100%;
+  overflow: hidden;
+  background: #111213;
+  isolation: isolate;
+}
+.space-atlas :is(button, input, select) {
+  font: inherit;
+  color: inherit;
+}
+.space-atlas button {
+  cursor: pointer;
+}
+.space-atlas button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.space-atlas :is(button, input, select):focus-visible {
+  outline: 2px solid #c4ccdc;
+  outline-offset: 3px;
+}
+.space-atlas code {
+  font:
+    10px/1.5 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+}
+
+/* The ruler is the surface. No header, readout, legend, or frame around it. */
+.space-world {
+  position: absolute;
+  inset: 0;
+  outline: none;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.space-world[data-dragging] {
+  cursor: grabbing;
+}
+.space-world:focus-visible {
+  outline: 2px solid #c4ccdc;
+  outline-offset: -6px;
+}
+.space-ruler {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  transition: transform 240ms var(--space-ease);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .space-atlas[data-intro='pending'] .space-ruler {
+    opacity: 0;
+  }
+}
+/* First-load height is already measured; never ease from the default viewport. */
+.space-atlas[data-intro='pending'] .space-ruler,
+.space-atlas[data-intro='running'] .space-ruler {
+  transition: none;
+}
+.space-ruler-axis {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: #52575c;
+}
+.space-zero-ground {
+  position: absolute;
+  left: 0;
+  top: -50px;
+  height: 280px;
+  background: #111213;
+  opacity: 0.78;
+  pointer-events: none;
+}
+.space-tick {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+}
+.space-tick > i {
+  position: absolute;
+  top: -8px;
+  width: 1px;
+  height: 8px;
+  background: #42474c;
+}
+.space-tick-major > i {
+  top: -18px;
+  height: 18px;
+  background: #777c81;
+}
+.space-tick-label {
+  position: absolute;
+  bottom: 30px;
+  left: 0;
+  transform: translateX(-50%);
+  color: #94999e;
+  font:
+    12px/1 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+}
+.space-tick-number,
+.space-intro-label {
+  display: block;
+}
+.space-number-departure {
+  position: absolute;
+  left: 0;
+  width: 0;
+  pointer-events: none;
+}
+.space-number-departure > span {
+  display: block;
+}
+.space-tick-beyond {
+  opacity: 0.45;
+}
+/* Actual values leave a fine engraving below the calibrated ticks.
+   Never clustered or snapped: density comes from physical proximity alone. */
+.space-value-marks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.space-value-mark {
+  position: absolute;
+  top: 2px;
+  left: -0.5px;
+  width: 1px;
+  height: 8px;
+  background: #a3a7ac;
+}
+.space-value-mark[data-active] {
+  background: #edeeef;
+}
+.space-landmarks {
+  position: relative;
+  z-index: 1;
+}
+.space-landmark {
+  position: absolute;
+  left: 0;
+  width: 0;
+}
+.space-landmark-stem {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  width: 1px;
+  background: #2b2e31;
+  pointer-events: none;
+}
+.space-stop {
+  position: absolute;
+  left: -54px;
+  width: 108px;
+  min-height: 44px;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  color: #b5b9bd;
+  text-align: center;
+  border-radius: 5px;
+}
+.space-stop[data-cluster] {
+  width: 116px;
+  left: -58px;
+}
+.space-stop-value {
+  display: block;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.space-stop-value small {
+  font:
+    10px ui-monospace,
+    monospace;
+  letter-spacing: 0;
+  margin-left: 5px;
+  color: #858a90;
+}
+.space-landmark[data-active] .space-stop {
+  color: #edeeef;
+}
+.space-landmark[data-active] .space-landmark-stem {
+  background: #8b9096;
+}
+.space-landmark[data-active] .space-stop::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 44px;
+  right: 44px;
+  height: 1px;
+  background: #edeeef;
+}
+
+/* Selection reveals only the material. Metadata stays with its specimen. */
+.space-focus {
+  position: absolute;
+  z-index: 2;
+  bottom: 104px;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  animation: space-focus-enter 180ms var(--space-ease);
+}
+.space-clear {
+  position: absolute;
+  right: 24px;
+  top: -42px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #9aa0a7;
+  font-size: 20px !important;
+  pointer-events: auto;
+}
+.space-specimen-strip {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  padding: 6px 24px;
+  overflow-x: auto;
+  pointer-events: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #52575c transparent;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+}
+.space-specimen-strip > * {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+.space-specimen-strip > :first-child {
+  margin-left: auto;
+}
+.space-specimen-strip > :last-child {
+  margin-right: auto;
+}
+
+/* Same quiet bottom-dock treatment as the color globe. */
+.space-dock {
+  position: absolute;
+  z-index: 4;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: min(640px, calc(100% - 32px));
+}
+.space-search,
+.space-zoom {
+  background: #1b1d1f;
+  border: 0;
+  box-shadow:
+    0 4px 10px #0006,
+    0 16px 40px #0009;
+  border-radius: 999px;
+}
+.space-search {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  padding: 6px 12px;
+  height: 52px;
+}
+.space-index-toggle {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 40px;
+  padding: 0;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 20px;
+  background: transparent;
+  color: #9aa0a7;
+}
+.space-index-toggle svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.space-index-toggle[aria-pressed='true'] {
+  color: #edeeef;
+}
+.space-search input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #edeeef;
+  font-size: 13px;
+}
+.space-search input::placeholder {
+  color: #9aa0a7;
+}
+.space-search input::-webkit-search-cancel-button {
+  display: none;
+}
+.space-search > button:not(.space-index-toggle) {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #33373c;
+}
+.space-zoom {
+  display: flex;
+  flex-shrink: 0;
+  padding: 4px;
+}
+.space-zoom button {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  background: transparent;
+  color: #d0d3d7;
+  font-size: 19px;
+}
+.space-zoom .space-reset {
+  width: 64px;
+  font:
+    11px ui-monospace,
+    monospace;
+}
+.space-results {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  width: 100%;
+  max-height: min(50svh, 440px);
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid #34373b;
+  border-radius: 16px;
+  background: #1b1d1f;
+  box-shadow: 0 12px 40px #0008;
+}
+.space-root {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px;
+  border-bottom: 1px solid #34373b;
+  color: #a7adb5;
+  font:
+    11px ui-monospace,
+    monospace;
+}
+.space-root select {
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid #34373b;
+  border-radius: 16px;
+  background: #25292d;
+}
+.space-results button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 50px;
+  padding: 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+}
+.space-result-glyph {
+  width: 23px;
+  font-size: 16px;
+  text-align: center;
+  color: #a7adb5;
+}
+.space-results button > span:nth-child(2) {
+  min-width: 0;
+  flex: 1;
+}
+.space-results code {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 11px;
+}
+.space-results button > span > small {
+  display: block;
+  color: #9aa0a7;
+  font-size: 10px;
+  margin-top: 5px;
+}
+.space-results strong {
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+}
+.space-results strong small {
+  font:
+    9px ui-monospace,
+    monospace;
+  margin-left: 3px;
+  color: #9aa0a7;
+}
+.space-results > p {
+  padding: 12px;
+  color: #a7adb5;
+  font-size: 12px;
+}
+.space-attribution {
+  position: absolute;
+  z-index: 2;
+  left: 16px;
+  bottom: 14px;
+  color: #edeeef73;
+  font:
+    10px ui-monospace,
+    monospace;
+  pointer-events: none;
+}
+.space-no-landmarks {
+  position: absolute;
+  top: 46%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+  color: #a7adb5;
+}
+.space-no-landmarks button {
+  padding: 9px 16px;
+  border: 1px solid #34373b;
+  border-radius: 20px;
+  background: #1b1d1f;
+  font-size: 12px;
+}
+.space-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .space-attribution {
+    top: 12px;
+    bottom: auto;
+    left: 12px;
+  }
+  .space-dock {
+    width: calc(100% - 24px);
+    gap: 6px;
+  }
+  .space-search {
+    padding-inline: 6px;
+  }
+  .space-search input {
+    font-size: 16px;
+    padding-inline: 4px;
+  }
+  .space-search input::placeholder {
+    font-size: 12px;
+  }
+  .space-zoom button {
+    width: 36px;
+  }
+  .space-zoom .space-reset {
+    width: 50px;
+    font-size: 10px;
+  }
+  .space-focus {
+    bottom: 100px;
+  }
+  .space-specimen-strip {
+    padding-inline: 16px;
+  }
+  .space-clear {
+    right: 12px;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .space-stop:hover {
+    color: #edeeef;
+  }
+  .space-results button:hover,
+  .space-zoom button:hover,
+  .space-clear:hover {
+    background: #2c2f33;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .space-atlas *,
+  .space-atlas *::before,
+  .space-atlas *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+.space-atlas[data-keyboard='true'] * {
+  animation: none !important;
+  transition: none !important;
+}
+.space-atlas button:active {
+  opacity: 0.72;
+}
+@media (max-height: 700px) {
+  .space-atlas[data-focused] .space-ruler {
+    transform: translateY(max(60px, calc(100svh - 452px))) !important;
+  }
+}
+@media (prefers-contrast: more) {
+  .space-stop,
+  .space-tick-label {
+    color: #edeeef;
+  }
+  .space-ruler-axis,
+  .space-landmark-stem {
+    background: #a7adb5;
+  }
+}
+@keyframes space-focus-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

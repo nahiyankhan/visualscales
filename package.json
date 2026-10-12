@@ -1,0 +1,58 @@
+{
+  "name": "visual-scales",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An interactive proof of concept for exploring color relationships and dimensional scales.",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=24.11.0 <25",
+    "pnpm": "10.33.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:e2e": "playwright test --config playwright.pages.config.ts",
+    "test:pages": "pnpm test:e2e",
+    "test:visual": "playwright test",
+    "test:split": "playwright test --project split-desktop --project split-mobile",
+    "test:globe": "playwright test --project color",
+    "test:space": "playwright test --project space-desktop --project space-laptop --project space-mobile",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e"
+  },
+  "dependencies": {
+    "colorjs.io": "^0.7.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^22.19.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@types/three": "^0.186.0",
+    "@vitejs/plugin-react": "^5.1.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^17.12.0",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.69.0",
+    "vite": "^7.2.7",
+    "vitest": "^4.0.16"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

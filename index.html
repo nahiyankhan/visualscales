@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#111213" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='12' fill='%239aa0a7'/%3E%3C/svg%3E"
+    />
+    <title>Visual Scales</title>
+    <meta name="description" content="Explore color and space with Visual Scales." />
+    <script>
+      // Preserve old collection bookmarks without painting a second entrance.
+      const params = new URLSearchParams(location.search)
+      if (params.get('view') === 'collection') {
+        document.documentElement.dataset.redirecting = 'true'
+        const destination = new URL('/globe.html', location.href)
+        if (params.get('token')) destination.searchParams.set('token', params.get('token'))
+        location.replace(destination.href)
+      }
+    </script>
+    <link rel="stylesheet" href="/src/split/style.css" />
+  </head>
+  <body>
+    <main class="split-app" data-renderer="poster">
+      <script>
+        // Reserve the live scene before first paint, rather than showing a
+        // cover-cropped poster with a different sphere size. Keep no-JS art.
+        if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          const app = document.querySelector('.split-app')
+          app.dataset.renderer = 'loading'
+          setTimeout(() => {
+            if (app.dataset.renderer === 'loading') {
+              app.dataset.renderer = 'poster'
+            }
+          }, 5000)
+        }
+      </script>
+      <div class="split-scene" aria-hidden="true">
+        <picture class="split-poster">
+          <source
+            media="(max-width:600px)"
+            srcset="/split/poster-mobile.webp"
+          />
+          <img src="/split/poster.webp" alt="" fetchpriority="high" />
+        </picture>
+        <div id="split-canvas"></div>
+      </div>
+      <header>
+        <a
+          class="split-wordmark"
+          href="/"
+          aria-label="visual scales home"
+          ><span aria-hidden="true">✳</span> visual scales</a
+        >
+      </header>
+      <button
+        class="split-spin"
+        hidden
+        aria-label="Rotate the shared color and space sphere"
+        aria-describedby="split-help"
+      ></button>
+      <nav class="split-choices" aria-label="Explore color and space">
+        <a href="/globe.html?token=palette.indigo.600" data-atlas="color"
+          >color <span aria-hidden="true">↗</span></a
+        >
+        <a href="/space.html" data-atlas="space"
+          >space <span aria-hidden="true">↗</span></a
+        >
+      </nav>
+      <p class="split-sr-only" id="split-help">
+        Hover over either half and scroll with two fingers to rotate both, or
+        click and drag. Arrow keys rotate; Home resets. Click the left half to
+        explore color or the right half to explore space. The links below also
+        open each experience.
+      </p>
+    </main>
+    <script type="module" src="/src/split/main.ts"></script>
+  </body>
+</html>
