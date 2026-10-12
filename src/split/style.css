@@ -1,4 +1,5 @@
 :root {
+  --split-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   color-scheme: dark;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color: #ecebe7;
@@ -28,6 +29,9 @@ a {
   overflow: hidden;
   isolation: isolate;
 }
+.split-app[data-renderer='loading'][data-intro='pending'] {
+  background: #111213;
+}
 .split-scene,
 #split-canvas,
 .split-poster {
@@ -49,7 +53,6 @@ a {
 }
 #split-canvas {
   opacity: 0;
-  transition: opacity 180ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 .split-app[data-renderer='webgl'] #split-canvas {
   opacity: 1;
@@ -65,6 +68,30 @@ a {
   display: flex;
   justify-content: center;
   pointer-events: none;
+}
+/* Leave the settled DOM visible by default: no-JS and poster fallbacks
+   never depend on an animation or a JavaScript timer to expose navigation. */
+.split-app[data-renderer='loading'][data-intro='pending'] header,
+.split-app[data-renderer='loading'][data-intro='pending'] .split-choices a {
+  opacity: 0;
+}
+.split-app[data-intro='running'][data-renderer='webgl'] header {
+  animation: split-chrome-enter 240ms 480ms var(--split-ease-out) both;
+}
+.split-app[data-intro='running'][data-renderer='webgl'] .split-choices a {
+  animation: split-chrome-enter 240ms 500ms var(--split-ease-out) both;
+}
+.split-app[data-intro='running'][data-renderer='webgl'] .split-choices a + a {
+  animation-delay: 560ms;
+}
+@keyframes split-chrome-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* Pending modules must not hide a focused native destination. */
+.split-app[data-renderer='loading'] header:focus-within,
+.split-app[data-renderer='loading'] .split-choices a:focus-visible {
+  opacity: 1;
 }
 .split-wordmark {
   display: inline-flex;

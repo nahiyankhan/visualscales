@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { atlasPalette } from '../atlas/palette.js'
 import { coastRotation, MAX_SPIN_SPEED, trackballPoint } from '../atlas/spin.js'
+import { sampleSplitIntro, SPLIT_INTRO_DURATION_MS } from './intro.js'
 import {
   floorFragment,
   floorVertex,
@@ -41,6 +42,7 @@ export function createSplitScene(
     uTime: { value: 0 },
     uViewport: { value: new THREE.Vector2(1, 1) },
     uProbe: { value: 0 },
+    uEmerge: { value: 0 },
     // THREE.Color decodes the token's sRGB hex into linear RGB once, not per pixel.
     uPalette: {
       value: atlasPalette.map((swatch) => new THREE.Color(swatch.hex)),
@@ -51,6 +53,8 @@ export function createSplitScene(
     vertexShader: sphereVertex,
     fragmentShader: sphereFragment,
     uniforms,
+    transparent: true,
+    depthWrite: false,
   })
   const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
   scene.add(sphere)
@@ -81,6 +85,10 @@ export function createSplitScene(
   let intersecting = true
   let previous = 0
   let elapsed = 0
+  const app = host.closest<HTMLElement>('.split-app')!
+  let introDone = app.dataset.intro === 'done'
+  let introTime = introDone ? SPLIT_INTRO_DURATION_MS : 0
+  app.dataset.intro = introDone ? 'done' : 'running'
   let distance = 6.25
   const spinAxis = new THREE.Vector3(0, 1, 0)
   const dragRotation = new THREE.Quaternion()
@@ -129,7 +137,13 @@ export function createSplitScene(
   function draw(delta = 0) {
     camera.position.set(0, 0, distance)
     camera.lookAt(0, 0, 0)
-    sphere.scale.setScalar(1.12)
+    const intro = sampleSplitIntro(introTime)
+    sphere.scale.setScalar(1.12 * intro.scale)
+    uniforms.uEmerge.value = intro.emerge
+    if (intro.done && !introDone) {
+      introDone = true
+      app.dataset.intro = 'done'
+    }
     if (activePointer === null && !paused && spinSpeed > 0.005) {
       spinSpeed = coastRotation(sphere.quaternion, spinAxis, spinSpeed, delta)
     }
@@ -149,9 +163,11 @@ export function createSplitScene(
   function tick(now: number) {
     frame = 0
     if (disposed || !visible || !intersecting || paused) return
-    const delta = Math.min((now - previous) / 1000 || 0, 0.05)
+    const frameTime = Math.max(0, now - previous)
+    const delta = Math.min(frameTime / 1000, 0.05)
     previous = now
     elapsed += delta
+    if (!introDone) introTime += frameTime
     draw(delta)
     frame = requestAnimationFrame(tick)
   }
@@ -177,6 +193,12 @@ export function createSplitScene(
     camera.updateProjectionMatrix()
     renderer.setSize(width, height, false)
     renderer.getDrawingBufferSize(uniforms.uViewport.value)
+    draw()
+  }
+
+  function finishIntro() {
+    if (introDone) return
+    introTime = SPLIT_INTRO_DURATION_MS
     draw()
   }
 
@@ -341,6 +363,7 @@ export function createSplitScene(
     visible = !document.hidden
     if (visible) resume()
     else {
+      finishIntro()
       resetPointer()
       stop()
     }
@@ -360,6 +383,8 @@ export function createSplitScene(
     else stop()
   })
   intersectionObserver.observe(host)
+  const introInputs = ['pointerdown', 'wheel', 'keydown', 'focusin', 'click'] as const
+  for (const event of introInputs) app.addEventListener(event, finishIntro, true)
   spinControl.addEventListener('pointerdown', onSpinStart)
   spinControl.addEventListener('pointermove', onSpinMove)
   spinControl.addEventListener('pointerup', onSpinEnd)
@@ -388,6 +413,7 @@ export function createSplitScene(
     stop()
     endSpin()
     if (preserveFrame) {
+      finishIntro()
       // WebGL's default drawing buffer is discarded after presentation. Render
       // and copy synchronously before disposing GPU resources on navigation.
       renderer.render(scene, camera)
@@ -402,6 +428,7 @@ export function createSplitScene(
       }
     }
     spinControl.hidden = true
+    for (const event of introInputs) app.removeEventListener(event, finishIntro, true)
     spinControl.removeEventListener('pointerdown', onSpinStart)
     spinControl.removeEventListener('pointermove', onSpinMove)
     spinControl.removeEventListener('pointerup', onSpinEnd)

@@ -360,6 +360,8 @@ test('reduced motion and WebGL failure retain artwork and native atlas links', a
   await page.goto('/')
   await expect(page.locator('.split-poster img')).toBeVisible()
   await expect(page.locator('.split-spin')).toBeHidden()
+  await expect(page.locator('.split-app')).toHaveAttribute('data-intro', 'done')
+  await expect(page.locator('.split-app header')).toHaveCSS('opacity', '1')
   await expect(page.locator('#split-canvas canvas')).toHaveCount(0)
   const wheel = await dispatchWheel(page, { deltaX: 40 })
   expect(wheel.accepted).toBe(true)
@@ -463,7 +465,7 @@ test('touch capture shares rotation, cancellation stops motion, and keyboard lin
   await expect(page).toHaveURL(/space.html$/)
 })
 
-test('split startup keeps poster hidden until delayed scene fades in without resizing', async ({
+test('split startup stays dark until the delayed finished globe emerges and settles exactly', async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' })
@@ -479,6 +481,10 @@ test('split startup keeps poster hidden until delayed scene fades in without res
   await expect(app).toHaveAttribute('data-renderer', 'loading')
   await expect(page.locator('.split-poster')).toBeHidden()
   await expect(page.locator('#split-canvas canvas')).toHaveCount(0)
+  await expect(app).toHaveCSS('background-color', 'rgb(17, 18, 19)')
+  await expect(page.locator('html')).toHaveCSS('color-scheme', 'dark')
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#111213')
+  await expect(page.locator('.split-app header')).toHaveCSS('opacity', '0')
   await expect
     .poll(() =>
       page.locator('.split-app header').evaluate((header) => {
@@ -492,10 +498,7 @@ test('split startup keeps poster hidden until delayed scene fades in without res
   await expect(app).toHaveAttribute('data-renderer', 'webgl')
   await expect(page.locator('.split-poster')).toBeHidden()
   await expect(page.locator('#split-canvas canvas')).toHaveCount(1)
-  await expect(page.locator('#split-canvas')).toHaveCSS(
-    'transition-property',
-    /(^|,\s*)opacity(,|$)/
-  )
+  await expect(page.locator('#split-canvas')).toHaveCSS('transition-duration', '0s')
   const stable = async () => {
     const before = await page.locator('.split-spin').boundingBox()
     await page.evaluate(
@@ -507,6 +510,7 @@ test('split startup keeps poster hidden until delayed scene fades in without res
     const after = await page.locator('.split-spin').boundingBox()
     expect(after).toEqual(before)
   }
+  await expect(app).toHaveAttribute('data-intro', 'done')
   await stable()
   await page.setViewportSize({ width: 390, height: 844 })
   await expect.poll(() => page.locator('.split-spin').evaluate((spin) => {
@@ -677,4 +681,153 @@ test('split study URL redirects and invalid color tokens use the fixture home', 
   await page.goto('/globe.html?token=not-a-token')
   await expect(page.locator('.surface-grid')).toHaveAttribute('data-center-token', 'palette.indigo.600')
   await expect(page.getByRole('link', { name: 'visual scales home' })).toHaveAttribute('href', '/')
+})
+
+// Capture immediately after actual GPU draws. Reading in a later RAF can see
+// a discarded default framebuffer, especially on mobile/DPR emulation.
+async function entranceFrame(page: Page) {
+  await page.clock.runFor(16)
+  return page.evaluate(() => (window as unknown as { entrancePixels: number[][] }).entrancePixels)
+}
+
+async function frozenEntrance(page: Page) {
+  await page.clock.install({ time: 0 })
+  await page.clock.pauseAt(0)
+  await page.addInitScript(() => {
+    const original = WebGL2RenderingContext.prototype.drawElements
+    WebGL2RenderingContext.prototype.drawElements = function (...args) {
+      Reflect.apply(original, this, args)
+      const pixel = (x: number, y: number) => {
+        const rgba = new Uint8Array(4)
+        this.readPixels(Math.floor(this.drawingBufferWidth * x),
+          Math.floor(this.drawingBufferHeight * y), 1, 1,
+          this.RGBA, this.UNSIGNED_BYTE, rgba)
+        return Array.from(rgba)
+      }
+      const spin = document.querySelector('.split-spin')!.getBoundingClientRect()
+      ;(window as unknown as { entrancePixels: number[][] }).entrancePixels = [
+        pixel(0.03, 0.5), pixel(0.97, 0.5),
+        pixel(0.46, 0.5), pixel(0.54, 0.5),
+        pixel(0.5 + spin.width / innerWidth * 0.4, 0.5),
+        pixel(0.5 + spin.width / innerWidth * 0.1, 0.5 + spin.height / innerHeight * 0.35),
+        pixel(0.5 - spin.width / innerWidth * 0.2, 0.5 + spin.height / innerHeight * 0.25),
+        pixel(0.5 + spin.width / innerWidth * 0.2, 0.5 - spin.height / innerHeight * 0.25),
+        pixel(0.03, 0.97),
+      ]
+    }
+  })
+  await page.goto('/')
+  await expect(page.locator('.split-app')).toHaveAttribute('data-renderer', 'webgl')
+}
+
+test('the finished split globe fades and grows centrally without background or material phases', async ({ page }) => {
+  await frozenEntrance(page)
+  const background = await entranceFrame(page)
+  const initial = (await page.locator('.split-spin').boundingBox())!
+  const chroma = (p: number[]) => Math.max(...p.slice(0, 3)) - Math.min(...p.slice(0, 3))
+  expect(background[8][0]).toBeLessThan(110)
+
+  await page.clock.runFor(160)
+  const emerging = await entranceFrame(page)
+  const growing = (await page.locator('.split-spin').boundingBox())!
+  expect(chroma(emerging[2])).toBeGreaterThan(20)
+  expect(chroma(emerging[3])).toBeLessThan(20)
+  expect(growing.width).toBeGreaterThan(initial.width)
+  expect(growing.x + growing.width / 2).toBeCloseTo(initial.x + initial.width / 2, 1)
+  expect(growing.y + growing.height / 2).toBeCloseTo(initial.y + initial.height / 2, 1)
+  await expect(page.locator('.split-app')).toHaveAttribute('data-intro', 'running')
+
+  await page.clock.runFor(680)
+  await expect(page.locator('.split-app')).toHaveAttribute('data-intro', 'done')
+  const final = await entranceFrame(page)
+  const bounds = (await page.locator('.split-spin').boundingBox())!
+  expect(bounds.width).toBeGreaterThan(growing.width)
+  expect(chroma(final[2])).toBeGreaterThan(20)
+  expect(chroma(final[3])).toBeLessThan(20)
+  // Only the globe enters; floor pixels stay settled throughout the entrance.
+  for (const index of [0, 1, 8]) {
+    for (let channel = 0; channel < 3; channel++) {
+      expect(Math.abs(emerging[index][channel] - background[index][channel])).toBeLessThanOrEqual(2)
+      expect(Math.abs(final[index][channel] - background[index][channel])).toBeLessThanOrEqual(2)
+    }
+  }
+  await expect(page.locator('html')).toHaveCSS('color-scheme', 'dark')
+  await page.clock.runFor(400)
+  expect(await page.locator('.split-spin').boundingBox()).toEqual(bounds)
+})
+
+test('input finishes the entrance before wheel or keyboard changes the sphere', async ({ page }) => {
+  await frozenEntrance(page)
+  const app = page.locator('.split-app')
+  await expect(app).toHaveAttribute('data-intro', 'running')
+  const wheel = await dispatchWheel(page, { deltaX: 48 })
+  await expect(app).toHaveAttribute('data-intro', 'done')
+  expect(wheel.defaultPrevented).toBe(true)
+  const settledRadius = (await page.locator('.split-spin').boundingBox())!.width / 2
+  expectRotationClose(wheel.rotation, expectedWheelRotation(48, 0, settledRadius))
+  await expect(page.locator('.split-app header')).toHaveCSS('opacity', '1')
+  await expect(page.locator('#split-canvas')).toHaveCSS('opacity', '1')
+  await expect(page.locator('#split-canvas')).toHaveCSS('transition-duration', '0s')
+  await resetSpin(page)
+  await page.clock.runFor(900)
+  await expect(page.locator('.split-spin')).toHaveAttribute('data-rotation', IDENTITY_ROTATION)
+  await frozenEntrance(page)
+  await page.getByRole('link', { name: 'space', exact: true }).focus()
+  await expect(app).toHaveAttribute('data-intro', 'done')
+  await expect(page.locator('[data-atlas="space"]')).toHaveCSS('opacity', '1')
+})
+
+test('the entrance replays on reload and when returning to the homepage', async ({ page }) => {
+  await frozenEntrance(page)
+  const app = page.locator('.split-app')
+  await page.clock.runFor(900)
+  await expect(app).toHaveAttribute('data-intro', 'done')
+
+  await page.reload()
+  await expect(app).toHaveAttribute('data-renderer', 'webgl')
+  await expect(app).toHaveAttribute('data-intro', 'running')
+  await expect(page.locator('html')).toHaveCSS('color-scheme', 'dark')
+  await page.clock.runFor(900)
+  await expect(app).toHaveAttribute('data-intro', 'done')
+
+  await page.getByRole('link', { name: 'space', exact: true }).click()
+  await page.getByRole('link', { name: 'visual scales home' }).click()
+  await expect(app).toHaveAttribute('data-renderer', 'webgl')
+  await expect(app).toHaveAttribute('data-intro', 'running')
+  await expect(page.locator('html')).toHaveCSS('color-scheme', 'dark')
+  await page.clock.runFor(900)
+  await expect(app).toHaveAttribute('data-intro', 'done')
+  await expect(page.locator('.split-app header')).toHaveCSS('opacity', '1')
+})
+
+test('watchdog artwork is not replaced by a late scene module', async ({ page }) => {
+  let releaseScene!: () => void
+  const gate = new Promise<void>((resolve) => (releaseScene = resolve))
+  let completed = false
+  await page.route(/\/src\/split\/scene\.ts(?:\?.*)?$/, async (route) => {
+    await gate
+    await route.continue()
+    completed = true
+  })
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
+  const app = page.locator('.split-app')
+  await expect(app).toHaveAttribute('data-renderer', 'poster', { timeout: 7000 })
+  releaseScene()
+  await expect.poll(() => completed).toBe(true)
+  // Let the import finish resolving, not just the route response.
+  await page.evaluate(async () => { const url = '/src/split/scene.ts'; await import(/* @vite-ignore */ url) })
+  await expect(app).toHaveAttribute('data-renderer', 'poster')
+  await expect(app).toHaveAttribute('data-intro', 'done')
+  await expect(page.locator('#split-canvas canvas')).toHaveCount(0)
+  await expect(page.locator('.split-poster img')).toBeVisible()
+})
+
+test('native destinations remain visible on keyboard focus while scene loads', async ({ page }) => {
+  await page.route(/\/src\/split\/scene\.ts(?:\?.*)?$/, () => new Promise(() => {}))
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
+  const color = page.getByRole('link', { name: 'color', exact: true })
+  await color.focus()
+  await expect(color).toHaveCSS('opacity', '1')
+  await color.press('Enter')
+  await expect(page).toHaveURL('/globe.html?token=palette.indigo.600')
 })

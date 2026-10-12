@@ -16,7 +16,7 @@ The split sphere is the canonical homepage. `/split.html` redirects to `/` for c
 - Two-finger trackpad scrolling over the sphere rotates both axes directly, following `/globe.html` pan direction. Native wheel momentum is not doubled. Off-sphere scroll and Ctrl/Meta-wheel zoom gestures are not intercepted.
 - Drag rotates with a 5px threshold; drag/cancel suppresses pointer navigation. Arrow keys rotate immediately; Home resets. Native color/space links support keyboard, modified-click, and no-JavaScript navigation.
 - Click left to open `/globe.html?token=…`, centered on a palette token sampled from the color shader. Click right to open `/space.html`. Both destination home pills return here. Navigation is between documents, not a sphere-to-ruler geometric morph.
-- Startup reserves a dark scene before first paint, then fades in the live canvas at its final size. A five-second module watchdog restores fallback art.
+- The finished color/measurement globe fades and grows from 92% to full scale at the center over 800ms. The charcoal background and projected floor artwork are already final; there is no white stage, material change, pause, clip, or dither. Navigation joins the same entrance with a 60ms stagger. It runs on every homepage load and starts only after the live scene is ready; any input settles it before interaction. A five-second module watchdog restores fallback art.
 - Navigation copies the last live frame synchronously while disposing GPU resources, avoiding an exit-time poster flash. Destinations start dark.
 - Reduced motion skips Three.js and keeps captured artwork. WebGL/context failure restores posters. Visibility/intersection pause rendering; DPR is capped; listeners, observers, and GPU resources are disposed.
 
@@ -34,4 +34,4 @@ pnpm test:split
 pnpm build
 ```
 
-Browser checks cover GPU color/monochrome pixels, shared rotation, wheel/drag/touch, loading and exit frames, fallback artwork, native home links, and Back navigation. Globe coverage verifies that its row intro remains intact. Tests use Playwright-managed Chromium and start their own Vite server.
+Browser checks cover GPU color/monochrome pixels, shared rotation, wheel/drag/touch, dark startup, finished split during emergence, and settled frames, interruption, exit frames, fallback artwork, native home links, and Back navigation. Globe coverage verifies that its row intro remains intact. Tests use Playwright-managed Chromium and start their own Vite server.

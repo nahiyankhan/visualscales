@@ -12,6 +12,7 @@ let disposed = false
 function poster() {
   generation++
   app.dataset.renderer = 'poster'
+  app.dataset.intro = 'done'
   scene?.dispose()
   scene = undefined
   spin.hidden = true
@@ -29,7 +30,9 @@ async function initialize() {
   app.dataset.renderer = 'loading'
   try {
     const { createSplitScene } = await import('./scene.js')
-    if (request !== generation || disposed || motion.matches) return
+    // The inline watchdog may have restored usable artwork while this module
+    // was in flight. A late response must not replace it with another entrance.
+    if (request !== generation || disposed || motion.matches || app.dataset.renderer !== 'loading') return
     scene = createSplitScene(host, spin, poster)
     app.dataset.renderer = 'webgl'
     spin.hidden = false

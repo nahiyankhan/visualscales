@@ -7,6 +7,11 @@ import {
 
 export { sphereVertex, floorVertex }
 
+// Only the finished sphere fades; the floor always renders its final artwork.
+const entrance = /* glsl */ `
+  uniform float uEmerge;
+`
+
 // Two readings of one rotating surface. The material boundary is screen-fixed;
 // object-space graduations and the original color field share one quaternion.
 const engraving = /* glsl */ `
@@ -62,12 +67,12 @@ const engraving = /* glsl */ `
 `
 
 export const sphereFragment = colorSphere
-  .replace('  void main() {', `${engraving}\n  void main() {`)
+  .replace('  void main() {', `${engraving}\n${entrance}\n  void main() {`)
   .replace(
     '    gl_FragColor = vec4(color + grain, 1.0);',
     `    float rightSide = step(uViewport.x * 0.5, gl_FragCoord.x);
     vec3 measured = measuredSurface(normalize(vPosition), normal, viewDirection);
-    gl_FragColor = vec4(mix(color, measured, rightSide) + grain, 1.0);`
+    gl_FragColor = vec4(mix(color, measured, rightSide) + grain, uEmerge);`
   )
 
 export const floorFragment = colorFloor

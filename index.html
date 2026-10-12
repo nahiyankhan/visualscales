@@ -25,14 +25,16 @@
   <body>
     <main class="split-app" data-renderer="poster">
       <script>
-        // Reserve the live scene before first paint, rather than showing a
-        // cover-cropped poster with a different sphere size. Keep no-JS art.
+        // Keep the final dark background while the live globe is loading.
+        // Keep no-JS artwork and restore it if the scene module never loads.
         if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
           const app = document.querySelector('.split-app')
+          app.dataset.intro = 'pending'
           app.dataset.renderer = 'loading'
           setTimeout(() => {
             if (app.dataset.renderer === 'loading') {
               app.dataset.renderer = 'poster'
+              app.dataset.intro = 'done'
             }
           }, 5000)
         }
