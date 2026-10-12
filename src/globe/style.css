@@ -34,9 +34,6 @@ button { font: inherit; }
   .toolbar-clear-search:active { transform: translateY(-50%); }
 }
 
-/* Quiet attribution; never intercepts the canvas. */
-.surface-attribution { position: absolute; left: 16px; bottom: 14px; z-index: 2; font: 11px ui-monospace, SFMono-Regular, monospace; color: rgba(237, 238, 239, .45); pointer-events: none; user-select: none; }
-
 /* Contextual navigation appears only when there is somewhere to go. */
 .surface-contextual { position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%); z-index: 3; display: flex; gap: 8px; }
 .surface-contextual button { min-height: 40px; padding: 0 18px; background: #1b1d1f; border: 1px solid #34373b; border-radius: 22px; color: #dddfe3; font-size: 12px; cursor: pointer; box-shadow: 0 4px 18px rgba(0, 0, 0, .4); }
@@ -45,17 +42,11 @@ button { font: inherit; }
 
 .surface-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
-/* Compact screens retain full controls without overlapping the search. */
-@media (max-width: 580px) {
-  .surface-attribution { top: 12px; bottom: auto; left: 12px; font-size: 10px; }
-}
-
 .surface-fallback { display: none; }
 .token-surface[data-renderer="unavailable"] { overflow: auto; padding: 24px; }
 .token-surface[data-renderer="unavailable"] .surface-viewport,
 .token-surface[data-renderer="unavailable"] .surface-dock,
 .token-surface[data-renderer="unavailable"] .surface-contextual,
-.token-surface[data-renderer="unavailable"] .surface-attribution,
 .token-surface[data-renderer="unavailable"] .relationship-connectors { display: none; }
 .token-surface[data-renderer="unavailable"] .surface-fallback { display: block; color: #c8cdd3; font-size: 14px; }
 .token-surface[data-renderer="unavailable"] .surface-sr-only { position: static; width: auto; height: auto; overflow: visible; clip-path: none; white-space: normal; list-style: none; padding: 0; }

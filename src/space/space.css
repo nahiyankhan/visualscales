@@ -480,17 +480,6 @@ body {
   color: #a7adb5;
   font-size: 12px;
 }
-.space-attribution {
-  position: absolute;
-  z-index: 2;
-  left: 16px;
-  bottom: 14px;
-  color: #edeeef73;
-  font:
-    10px ui-monospace,
-    monospace;
-  pointer-events: none;
-}
 .space-no-landmarks {
   position: absolute;
   top: 46%;
@@ -522,11 +511,6 @@ body {
 }
 
 @media (max-width: 700px) {
-  .space-attribution {
-    top: 12px;
-    bottom: auto;
-    left: 12px;
-  }
   .space-dock {
     width: calc(100% - 24px);
     gap: 6px;

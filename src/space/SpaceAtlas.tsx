@@ -441,12 +441,6 @@ export default function SpaceAtlas() {
           </div>
         )}
       </footer>
-      <span
-        className="space-attribution"
-        title="50 fictional dimensional tokens"
-      >
-        space — sample
-      </span>
       <p className="space-sr-only">
         Engraved marks below the axis show each distinct resolved value,
         including values inside labelled ranges. Shared values make one mark,
