@@ -33,11 +33,8 @@ Space is a single edge-to-edge dimensional ruler with one globe-style bottom doc
 ## Verification
 
 ```sh
-pnpm typecheck
-pnpm lint
-pnpm test
-pnpm test:space
-pnpm build
+pnpm check
+pnpm typecheck  # standalone TypeScript check when needed
 ```
 
-Browser tests use Playwright-managed Chromium at desktop, laptop, and mobile sizes; the mobile project emulates reduced motion. Math tests cover linear axis, anchored zoom, scale limits, ticks, and frame-rate-independent inertia. Browser coverage includes gestures, direct stop clicks, viewport width, mixed specimens, root computation, alias identity, search/index reachability, and keyboard. Touch handoff is synthetic PointerEvent testing, not physical-hardware validation. Firefox/Safari and real screen-reader software are unverified.
+`pnpm check` runs lint, Vitest unit tests, and build; build includes TypeScript checking. Math tests cover linear axis, anchored zoom, scale limits, ticks, and frame-rate-independent inertia. Use `pnpm build && pnpm preview` for a short manual browser check of gestures, direct stop clicks, root computation, alias identity, search/index reachability, keyboard access, and reduced motion. Touch handoff, physical devices, additional browsers, and real screen-reader software need separate manual verification.

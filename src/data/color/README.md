@@ -14,6 +14,8 @@ Tests in this directory help keep palette generation, semantic grouping, compone
 ## Verification
 
 ```sh
-pnpm test
-pnpm test:globe
+pnpm check
+pnpm typecheck  # standalone TypeScript check when needed
 ```
+
+`pnpm check` runs lint, Vitest unit tests, and build; build includes TypeScript checking. Use `pnpm build && pnpm preview` for a short manual browser check of color search, selection, and relationship navigation.

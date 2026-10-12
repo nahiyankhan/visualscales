@@ -17,7 +17,7 @@ There is no SPA fallback. The build is intended for hosting at a domain root so 
 - `src/atlas/` contains shared sphere artwork, palette anchors, shaders, and spin math used by the entrance.
 - `src/globe/` owns the color collection and relationship interactions.
 - `src/data/color/` contains the fixed fictional color fixture and generation semantics used by the globe and atlas.
-- `src/space/` owns the dimensional ruler, camera, specimens, root-unit handling, and space interaction tests.
+- `src/space/` owns the dimensional ruler, camera, specimens, root-unit handling, and unit tests.
 - `public/split/` contains the entrance fallback posters. `public/atlas/` retains
   earlier artwork captures; the current entrance does not reference them.
 
@@ -37,16 +37,15 @@ Root scripts cover:
 
 - `pnpm dev` for local development,
 - `pnpm build` and `pnpm preview` for the static production build,
-- `pnpm typecheck`, `pnpm lint`, and `pnpm test` for code checks,
-- `pnpm test:e2e` for self-contained production-route Chromium checks,
-- `pnpm test:visual` for detailed desktop/mobile visual suites,
-- `pnpm test:split`, `pnpm test:globe`, and `pnpm test:space` for targeted experience checks,
-- `pnpm check` for lint, types, unit tests, build, and e2e.
+- `pnpm typecheck` for a standalone TypeScript check,
+- `pnpm lint` and `pnpm test` for linting and Vitest unit tests,
+- `pnpm check` for lint, Vitest unit tests, and build.
 
-Install Playwright-managed Chromium with `pnpm exec playwright install chromium`.
-The production suite builds and serves `dist/` on port 4186. Detailed interaction
-tests start Vite on port 4187 and can import source modules for geometry assertions.
-Both suites stop their servers when finished.
+`pnpm build` includes TypeScript checking. For a short manual browser check, run
+`pnpm build && pnpm preview`, then verify the home to color/space paths, search,
+selection, navigation, gestures, keyboard access, and reduced motion where
+relevant.
 
-The CI workflow runs these checks on Linux; a workflow file alone does not prove
-a remote run succeeded. Physical devices and screen readers need separate verification.
+The CI workflow installs dependencies and runs `pnpm check`; it does not install
+browsers or upload browser-test artifacts. Physical devices, additional browsers,
+and screen readers need separate manual verification.

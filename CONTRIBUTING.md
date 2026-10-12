@@ -11,28 +11,25 @@ Use Node 24.11.0 (`.nvmrc`) and pnpm 10.33.0:
 ```sh
 corepack enable
 pnpm install --frozen-lockfile
-pnpm exec playwright install chromium
 pnpm dev
 ```
 
 If Node omits Corepack, install the pinned pnpm version using the
-[pnpm installation guide](https://pnpm.io/installation). On Linux, browser tests
-may also require `pnpm exec playwright install --with-deps chromium`.
+[pnpm installation guide](https://pnpm.io/installation).
 
 ## Checks
 
 ```sh
-pnpm check        # lint, types, unit tests, build, production-route tests
-pnpm test:visual  # split, color, and space interaction suites
+pnpm check      # lint, Vitest unit tests, and build
+pnpm typecheck  # standalone TypeScript check when needed
 ```
 
-Focused checks: `pnpm test`, `pnpm test:split`, `pnpm test:globe`, and
-`pnpm test:space`. Browser tests start their own servers on ports 4186 and 4187.
-Keep those ports free. Run `pnpm build && pnpm preview` to inspect a production build.
+`pnpm build` includes TypeScript checking. Run `pnpm build && pnpm preview` for a
+short manual browser check: home to color/space navigation, search, selection,
+page navigation, gestures, keyboard access, and reduced motion where relevant.
 
-The CI workflow runs the same checks with Playwright-managed Chromium. Automated
-mobile coverage uses emulation, not physical devices. Record separate Safari,
-Firefox, and screen-reader checks when you perform them.
+The CI workflow installs dependencies and runs `pnpm check`. Record separate
+manual browser, physical-device, and screen-reader checks when you perform them.
 
 ## Changes
 

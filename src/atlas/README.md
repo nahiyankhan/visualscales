@@ -13,8 +13,8 @@ The split entrance opens Color at `/globe.html` and Space at `/space.html`. Both
 ## Verification
 
 ```sh
-pnpm test
-pnpm test:split
+pnpm check
+pnpm typecheck  # standalone TypeScript check when needed
 ```
 
-Unit tests verify palette generation and spin math. Browser coverage for the split entrance verifies the shared sphere behavior without adding new runtime dependencies or alternate visuals.
+`pnpm check` runs lint, Vitest unit tests, and build; build includes TypeScript checking. Use `pnpm build && pnpm preview` for a short manual browser check of the shared sphere behavior.

@@ -27,11 +27,8 @@ Original procedural image based on the project's shader artwork and fictional co
 ## Verification
 
 ```sh
-pnpm typecheck
-pnpm lint
-pnpm test
-pnpm test:split
-pnpm build
+pnpm check
+pnpm typecheck  # standalone TypeScript check when needed
 ```
 
-Browser checks cover GPU color/monochrome pixels, shared rotation, wheel/drag/touch, dark startup, finished split during emergence, and settled frames, interruption, exit frames, fallback artwork, native home links, and Back navigation. Globe coverage verifies that its row intro remains intact. Tests use Playwright-managed Chromium and start their own Vite server.
+`pnpm check` runs lint, Vitest unit tests, and build; build includes TypeScript checking. Use `pnpm build && pnpm preview` for a short manual browser check of shared rotation, wheel/drag/touch, fallback artwork, native home links, Back navigation, keyboard access, and reduced motion.

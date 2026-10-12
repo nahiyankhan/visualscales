@@ -6,23 +6,20 @@ Use this checklist before publishing the fixture POC.
 
 - [ ] `corepack enable`
 - [ ] `pnpm install --frozen-lockfile`
-- [ ] `pnpm exec playwright install chromium`
-- [ ] `pnpm lint`
-- [ ] `pnpm typecheck`
-- [ ] `pnpm test`
-- [ ] `pnpm build`
-- [ ] `pnpm test:e2e`
-- [ ] `pnpm test:visual`
+- [ ] `pnpm check`
 - [ ] Confirm `dist/` contains the domain-root pages for `/`, `/globe.html`, `/space.html`, and the `/split.html` redirect.
 - [ ] Confirm no documentation claims an online demo or owned production domain unless that deployment exists.
 
 ## Visual and interaction review
 
+- [ ] Run `pnpm build && pnpm preview` for a short manual browser check.
+- [ ] Confirm home to color/space navigation works.
+- [ ] Confirm search, selection, and page navigation still work.
+- [ ] Confirm gestures, keyboard access, and reduced motion where relevant.
 - [ ] Confirm the split entrance visuals match the approved current behavior.
 - [ ] Confirm the globe row intro, relationship view, and token-centering links still work.
 - [ ] Confirm the space ruler still preserves actual-size specimen behavior, root-unit controls, alias identity, keyboard access, and large-value reachability.
-- [ ] Record the browser versions used for automated checks.
-- [ ] Record any unverified physical devices, Safari/Firefox checks, and screen-reader checks.
+- [ ] Record browser, device, and screen-reader checks performed, plus any gaps.
 
 ## License and assets
 

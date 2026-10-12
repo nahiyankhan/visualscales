@@ -28,12 +28,8 @@ The centered **Visual Scales** home pill returns to `/`. Browser Back from a hom
 ## Verification
 
 ```sh
-pnpm typecheck
-pnpm lint
-pnpm test
-pnpm test:globe
-pnpm build
+pnpm check
+pnpm typecheck  # standalone TypeScript check when needed
 ```
 
-Browser tests use Playwright-managed Chromium and start their own Vite server.
-Physical devices, screen readers, and remote CI need separate verification.
+`pnpm check` runs lint, Vitest unit tests, and build; build includes TypeScript checking. Use `pnpm build && pnpm preview` for a short manual browser check of token search, selection, relationship navigation, keyboard access, and reduced motion where relevant. Physical devices, additional browsers, and screen readers need separate manual verification.

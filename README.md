@@ -62,21 +62,19 @@ and maintainer are in place.
 
 ## Verify and contribute
 
-Install the test browser once:
-
 ```sh
-pnpm exec playwright install chromium
-pnpm check        # lint, types, unit tests, build, production-route tests
-pnpm test:visual  # self-contained desktop/mobile interaction suites
+pnpm check      # lint, Vitest unit tests, and build
+pnpm typecheck  # standalone TypeScript check when needed
 ```
 
-Focused commands: `pnpm test`, `pnpm test:split`, `pnpm test:globe`, and
-`pnpm test:space`. Browser suites start and stop their own servers. They do not
-require installed Chrome or an already running dev server.
+`pnpm build` includes TypeScript checking. For a short manual browser check, run
+`pnpm build && pnpm preview`, then verify home to color/space navigation, search,
+selection, page navigation, gestures, keyboard access, and reduced motion where
+relevant.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md), [architecture](docs/architecture.md), and
 the [release checklist](docs/release-checklist.md). Physical-device and screen-reader
-verification remain separate from automated browser coverage.
+verification remain separate manual checks.
 
 ## License
 

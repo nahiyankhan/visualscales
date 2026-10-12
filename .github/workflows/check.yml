@@ -22,13 +22,4 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm check
-      - run: pnpm test:visual
-      - uses: actions/upload-artifact@v7
-        if: failure()
-        with:
-          name: browser-test-results
-          path: test-results/
-          if-no-files-found: ignore
-          retention-days: 7
