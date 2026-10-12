@@ -4,11 +4,11 @@
   --space-specimen-muted: #9aa0a7;
   --space-specimen-dark: #c8ccd1;
   --space-specimen-accent: #858b92;
-  inline-size: 224px;
-  min-inline-size: 224px;
-  block-size: 178px;
+  inline-size: 248px;
+  min-inline-size: 248px;
+  block-size: 176px;
   display: grid;
-  grid-template-rows: 120px 1fr;
+  grid-template-rows: 136px 1fr;
   gap: 12px;
   padding: 0;
   border: 0;
@@ -17,17 +17,13 @@
   color: var(--space-specimen-ink);
   font: inherit;
   text-align: left;
-  cursor: pointer;
   overflow: hidden;
-  appearance: none;
-}
-.space-specimen[aria-pressed='true'] .space-specimen-well {
-  border-color: #858b92;
 }
 .space-specimen-foot {
-  display: grid;
-  align-content: start;
-  gap: 3px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
   padding-inline: 2px;
   min-width: 0;
   color: var(--space-specimen-muted);
@@ -38,41 +34,29 @@
     monospace;
 }
 .space-specimen-foot code {
+  min-width: 0;
   overflow: hidden;
   color: #b5bac0;
   font: inherit;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.space-specimen-detail {
+.space-specimen-note {
+  flex-shrink: 0;
   color: #858b92;
-}
-.space-specimen-foot span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 9px;
 }
 
 .space-specimen-well {
   position: relative;
   display: grid;
   place-items: center;
-  min-block-size: 112px;
+  min-block-size: 128px;
   overflow: hidden;
   border: 1px solid transparent;
   border-radius: 8px;
   background: var(--space-specimen-well);
   color: var(--space-specimen-dark);
-}
-
-.space-specimen-measure {
-  position: absolute;
-  inset-block-end: 6px;
-  inset-inline: 8px;
-  z-index: 2;
-  color: var(--space-specimen-muted);
-  font-size: 9px;
-  line-height: 1.15;
 }
 
 .space-specimen-type-well {
@@ -87,17 +71,6 @@
   max-inline-size: 320px;
   line-height: 1.05;
   white-space: nowrap;
-}
-
-.space-specimen-type-measure::before,
-.space-specimen-leading-measure::before {
-  content: '';
-  display: inline-block;
-  inline-size: 28px;
-  block-size: 1px;
-  margin-inline-end: 5px;
-  vertical-align: middle;
-  background: var(--space-specimen-accent);
 }
 
 .space-specimen-leading-well {
@@ -161,7 +134,7 @@
 }
 
 .space-specimen-gap-line {
-  inset-block-start: 82px;
+  inset-block-start: calc(50% + 38px);
   inset-inline-start: 50%;
   transform: translateX(-50%);
 }
@@ -216,6 +189,10 @@
   background: var(--space-specimen-dark);
 }
 
+.space-specimen-border-mark {
+  inset-inline-end: calc(50% - 62px);
+}
+
 .space-specimen-icon-box {
   position: relative;
   z-index: 1;
@@ -235,7 +212,6 @@
   position: relative;
   z-index: 1;
   display: block;
-  inline-size: 174px;
   block-size: 54px;
   overflow: hidden;
   border-inline-end: 1px dashed #969ca3;
@@ -249,23 +225,14 @@
 }
 
 .space-specimen-dimension-mark {
-  inset-block-start: 88px;
+  inset-block-start: calc(50% + 38px);
   inset-inline-start: 50%;
   transform: translateX(-50%);
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .space-specimen:hover .space-specimen-well {
-    border-color: #52575c;
-  }
-}
-.space-specimen:focus-visible {
-  outline: 2px solid #c4ccdc;
-  outline-offset: 3px;
-}
 @media (max-width: 680px) {
   .space-specimen {
-    inline-size: 210px;
-    min-inline-size: 210px;
+    inline-size: 232px;
+    min-inline-size: 232px;
   }
 }

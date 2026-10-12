@@ -57,9 +57,9 @@ export default function SpaceAtlas() {
   const selectedGroup = groups.find((group) => group.value === selected?.value)
   const matches = searchMeasurements(items, query)
   const stops = layoutStops(groups, camera, size.width, selected?.value)
-  const axisY = selectedGroup
-    ? Math.max(90, size.height * 0.38)
-    : size.height * 0.46
+  // Reserve room for the specimen strip even when nothing is selected, so
+  // the ruler never shifts and its lower labels stay clear on short screens.
+  const axisY = Math.min(size.height * 0.46, Math.max(90, size.height - 464))
   const ticks = makeTicks(camera, size.width)
   const choose = (item: Measurement, instant = keyboard) => {
     setSelectedId(item.id)
@@ -146,7 +146,6 @@ export default function SpaceAtlas() {
       className="space-atlas"
       data-intro="pending"
       data-keyboard={keyboard}
-      data-focused={!!selectedGroup || undefined}
       onPointerDownCapture={(event) => {
         setKeyboard(false)
         if (!viewport.current?.contains(event.target as Node)) stop()
@@ -305,12 +304,9 @@ export default function SpaceAtlas() {
           </button>
           <div className="space-specimen-strip">
             {selectedGroup.items.map((item) => (
-              <Specimen
-                key={item.id}
-                item={item}
-                selected={item.id === selectedId}
-                onSelect={(instant) => choose(item, instant)}
-              />
+              <div className="space-specimen-entry" key={item.id}>
+                <Specimen item={item} />
+              </div>
             ))}
           </div>
         </section>

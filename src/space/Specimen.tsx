@@ -4,6 +4,7 @@ import { format, kindLabels, type Measurement } from './data.js'
 import './specimen.css'
 
 const sample = 'Good things take shape.'
+const dimensionPreviewWidth = 198
 
 function px(value: number) {
   return `${format(value)}px`
@@ -31,9 +32,6 @@ function TypePreview({ item }: { item: Measurement }) {
       >
         {sample}
       </span>
-      <span className="space-specimen-measure space-specimen-type-measure">
-        {px(item.value)} type
-      </span>
     </span>
   )
 }
@@ -60,9 +58,6 @@ function LeadingPreview({ item }: { item: Measurement }) {
         style={{ height: item.value, top: `calc(50% - ${item.value}px)` }}
         aria-hidden="true"
       />
-      <span className="space-specimen-measure space-specimen-leading-measure">
-        {px(item.value)} leading
-      </span>
     </span>
   )
 }
@@ -79,13 +74,11 @@ function GapPreview({ item }: { item: Measurement }) {
         style={{ width: item.value }}
         aria-hidden="true"
       />
-      <span className="space-specimen-measure">{px(item.value)} gap</span>
     </span>
   )
 }
 
 function RadiusPreview({ item }: { item: Measurement }) {
-  const capped = item.value > 40
   return (
     <span className="space-specimen-well space-specimen-radius-well">
       <span
@@ -101,9 +94,6 @@ function RadiusPreview({ item }: { item: Measurement }) {
         }}
         aria-hidden="true"
       />
-      <span className="space-specimen-measure">
-        {px(item.value)} radius{capped ? ' · CSS capped by 120×80 shape' : ''}
-      </span>
     </span>
   )
 }
@@ -115,9 +105,11 @@ function BorderPreview({ item }: { item: Measurement }) {
         className="space-specimen-border-line"
         style={{ height: item.value }}
       />
-      <span className="space-specimen-measure">
-        100px line · {px(item.value)} thick
-      </span>
+      <span
+        className="space-specimen-leading-mark space-specimen-border-mark"
+        style={{ height: item.value, top: `calc(50% - ${item.value / 2}px)` }}
+        aria-hidden="true"
+      />
     </span>
   )
 }
@@ -147,7 +139,10 @@ function DimensionPreview({ item }: { item: Measurement }) {
           />
         </svg>
       ) : (
-        <span className="space-specimen-wide-clip">
+        <span
+          className="space-specimen-wide-clip"
+          style={{ width: dimensionPreviewWidth }}
+        >
           <span
             className="space-specimen-wide-box"
             style={{ width: item.value }}
@@ -158,13 +153,6 @@ function DimensionPreview({ item }: { item: Measurement }) {
         className="space-specimen-dimension-mark"
         style={{ width: item.value }}
       />
-      <span className="space-specimen-measure">
-        {small
-          ? `${px(item.value)} actual square`
-          : item.value > 174
-            ? `${px(item.value)} actual width · clipped`
-            : `${px(item.value)} actual width`}
-      </span>
     </span>
   )
 }
@@ -186,33 +174,26 @@ function Preview({ item }: { item: Measurement }) {
   }
 }
 
-export function Specimen({
-  item,
-  selected,
-  onSelect,
-}: {
-  item: Measurement
-  selected: boolean
-  onSelect: (instant: boolean) => void
-}) {
+export function Specimen({ item }: { item: Measurement }) {
+  const note =
+    item.kind === 'dimension' && item.value > dimensionPreviewWidth
+      ? 'clipped'
+      : item.kind === 'radius' && item.value > 40
+        ? 'capped'
+        : ''
+  const context = `${item.context}${note ? ` · ${note === 'clipped' ? 'Actual width is clipped, not scaled' : 'Radius is CSS-capped by the 120×80 shape'}` : ''}`
   return (
-    <button
+    <article
       className="space-specimen"
-      type="button"
-      aria-pressed={selected}
-      aria-label={`${item.id}, ${kindLabels[item.kind]}, ${item.expression} → ${px(item.value)}. ${item.context}`}
-      title={`${item.name} · ${item.expression} → ${px(item.value)} · ${item.context}`}
-      onClick={(event) => onSelect(event.detail === 0)}
+      aria-label={`${item.id}, ${kindLabels[item.kind]}, ${item.expression} → ${px(item.value)}. ${context}`}
+      title={`${item.name} · ${item.expression} → ${px(item.value)} · ${context}`}
     >
       <Preview item={item} />
       <span className="space-specimen-foot">
         <code>{item.id}</code>
-        <span className={selected ? 'space-specimen-detail' : 'space-sr-only'}>
-          {item.expression} → {px(item.value)}
-          <span className="space-sr-only"> · {item.context}</span>
-        </span>
+        {note && <span className="space-specimen-note">{note}</span>}
       </span>
-    </button>
+    </article>
   )
 }
 

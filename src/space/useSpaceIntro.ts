@@ -26,8 +26,8 @@ export function useSpaceIntro(ruler: RefObject<HTMLDivElement | null>) {
       // presentation effects snaps there before the input changes the camera.
       for (const animation of animations) animation.cancel()
       animations.clear()
-      // Resolve the pending startup height before restoring the normal
-      // selection transition, so interruption never eases ruler geometry.
+      // Resolve the pending startup height before making the ruler visible,
+      // so interruption never exposes default viewport geometry.
       void surface.getBoundingClientRect()
       root.dataset.intro = 'done'
     }

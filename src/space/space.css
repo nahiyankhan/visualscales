@@ -71,17 +71,11 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  transition: transform 240ms var(--space-ease);
 }
 @media (prefers-reduced-motion: no-preference) {
   .space-atlas[data-intro='pending'] .space-ruler {
     opacity: 0;
   }
-}
-/* First-load height is already measured; never ease from the default viewport. */
-.space-atlas[data-intro='pending'] .space-ruler,
-.space-atlas[data-intro='running'] .space-ruler {
-  transition: none;
 }
 .space-ruler-axis {
   position: absolute;
@@ -238,7 +232,6 @@ body {
   left: 0;
   right: 0;
   pointer-events: none;
-  animation: space-focus-enter 180ms var(--space-ease);
 }
 .space-clear {
   position: absolute;
@@ -257,7 +250,8 @@ body {
   display: flex;
   gap: 12px;
   width: 100%;
-  padding: 6px 24px;
+  /* Room for the upward entrance without clipping or a vertical scrollbar. */
+  padding: 12px 24px;
   overflow-x: auto;
   pointer-events: auto;
   scrollbar-width: thin;
@@ -268,6 +262,33 @@ body {
 .space-specimen-strip > * {
   flex-shrink: 0;
   scroll-snap-align: start;
+}
+.space-specimen-strip > .space-specimen-entry {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 240ms var(--space-ease),
+    transform 240ms var(--space-ease);
+
+  @starting-style {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.space-specimen-strip > .space-specimen-entry:nth-child(2) {
+  transition-delay: 50ms;
+}
+.space-specimen-strip > .space-specimen-entry:nth-child(3) {
+  transition-delay: 100ms;
+}
+.space-specimen-strip > .space-specimen-entry:nth-child(4) {
+  transition-delay: 150ms;
+}
+.space-specimen-strip > .space-specimen-entry:nth-child(5) {
+  transition-delay: 200ms;
+}
+.space-specimen-strip > .space-specimen-entry:nth-child(n + 6) {
+  transition-delay: 250ms;
 }
 .space-specimen-strip > :first-child {
   margin-left: auto;
@@ -563,11 +584,6 @@ body {
 .space-atlas button:active {
   opacity: 0.72;
 }
-@media (max-height: 700px) {
-  .space-atlas[data-focused] .space-ruler {
-    transform: translateY(max(60px, calc(100svh - 452px))) !important;
-  }
-}
 @media (prefers-contrast: more) {
   .space-stop,
   .space-tick-label {
@@ -576,13 +592,5 @@ body {
   .space-ruler-axis,
   .space-landmark-stem {
     background: #a7adb5;
-  }
-}
-@keyframes space-focus-enter {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
   }
 }
